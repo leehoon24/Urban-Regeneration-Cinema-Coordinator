@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도시 재생 시네마 코디네이터</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 199, 44, 0.1);
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        nav a:hover {
+            color: #FFC72C;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #FFC72C;
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 199, 44, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+        
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #FFC72C;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(255, 199, 44, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.5rem;
+            max-width: 900px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-image {
+            width: 100%;
+            max-width: 1000px;
+            height: 400px;
+            background: linear-gradient(135deg, #1F3C5F 0%, #0a0a0a 100%);
+            border-radius: 12px;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #888;
+            border: 2px solid rgba(255, 199, 44, 0.2);
+            box-shadow: 0 20px 60px rgba(255, 199, 44, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-image::before {
+            content: '🎬';
+            font-size: 6rem;
+            position: absolute;
+            opacity: 0.1;
+        }
+        
+        /* Section Styles */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        section h2 {
+            font-size: 2.5rem;
+            color: #FFC72C;
+            margin-bottom: 3rem;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        section h2::before {
+            content: attr(data-icon);
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .problem-list, .solution-list {
+            display: grid;
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .problem-item, .solution-item {
+            background: rgba(31, 60, 95, 0.1);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #FFC72C;
+            transition: all 0.3s ease;
+        }
+        
+        .problem-item:hover, .solution-item:hover {
+            transform: translateX(10px);
+            background: rgba(31, 60, 95, 0.2);
+            box-shadow: 0 10px 30px rgba(255, 199, 44, 0.1);
+        }
+        
+        .problem-item h3, .solution-item h3 {
+            color: #FFC72C;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .quote {
+            background: rgba(255, 199, 44, 0.05);
+            padding: 2rem;
+            border-left: 4px solid #FFC72C;
+            margin: 3rem 0;
+            font-style: italic;
+            border-radius: 8px;
+        }
+        
+        .quote p {
+            color: #d0d0d0;
+            font-size: 1.1rem;
+        }
+        
+        /* Benefits Section */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+        
+        .benefit-card {
+            background: linear-gradient(135deg, rgba(31, 60, 95, 0.2) 0%, rgba(10, 10, 10, 0.5) 100%);
+            padding: 3rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255, 199, 44, 0.1);
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(255, 199, 44, 0.2);
+            border-color: #FFC72C;
+        }
+        
+        .benefit-card h3 {
+            color: #FFC72C;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .benefit-card h3::before {
+            content: attr(data-icon);
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 3rem 0;
+            background: rgba(31, 60, 95, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        th {
+            background: #1F3C5F;
+            color: #FFC72C;
+            padding: 1.5rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 199, 44, 0.1);
+        }
+        
+        tr:hover {
+            background: rgba(255, 199, 44, 0.05);
+        }
+        
+        /* Pricing */
+        .pricing-box {
+            background: linear-gradient(135deg, #1F3C5F 0%, #0a0a0a 100%);
+            padding: 3rem;
+            border-radius: 12px;
+            margin: 3rem 0;
+            border: 2px solid #FFC72C;
+            box-shadow: 0 20px 60px rgba(255, 199, 44, 0.2);
+        }
+        
+        .pricing-box h3 {
+            color: #FFC72C;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .warning {
+            background: rgba(255, 199, 44, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            border-left: 4px solid #FFC72C;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, #1F3C5F 0%, #0a0a0a 100%);
+            padding: 6rem 2rem;
+            text-align: center;
+            border-top: 2px solid #FFC72C;
+            border-bottom: 2px solid #FFC72C;
+        }
+        
+        .cta-section h2 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-section p {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 1.5rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #FFC72C;
+            color: #0a0a0a;
+            box-shadow: 0 10px 30px rgba(255, 199, 44, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 199, 44, 0.5);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #FFC72C;
+            border: 2px solid #FFC72C;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 199, 44, 0.1);
+            transform: translateY(-3px);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            section h2 {
+                font-size: 2rem;
+            }
+            
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#problem">문제</a></li>
+            <li><a href="#solution">솔루션</a></li>
+            <li><a href="#benefits">혜택</a></li>
+            <li><a href="#trust">신뢰</a></li>
+            <li><a href="#pricing">가격</a></li>
+            <li><a href="#cta">신청</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-icon">🎞️</div>
+        <h1>도시 재생 시네마 코디네이터</h1>
+        <p class="hero-subtitle">
+            텅 빈 공간을, 가장 '힙'한 청년 문화의 상영관으로.<br>
+            지역 정주율을 높이는 시네마 기반 도시 활력 솔루션.
+        </p>
+        <div class="hero-image">
+            버려진 공간에 골드 조명이 비추는 시네마 팝업 이미지
+        </div>
+    </div>
+
+    <section id="problem">
+        <h2 data-icon="🎬">문제 정의</h2>
+        <p style="text-align: center; font-size: 1.3rem; margin-bottom: 3rem; color: #d0d0d0;">
+            지역의 미래는 <strong style="color: #FFC72C;">청년</strong>입니다. 하지만 그들이 머무를 <strong style="color: #FFC72C;">이유</strong>가 없습니다.
+        </p>
+        <p style="text-align: center; margin-bottom: 3rem; line-height: 1.8;">
+            수많은 도시 재생 프로젝트에도 불구하고, 청년들이 '진짜' 필요로 하는 문화 콘텐츠와 공간은 늘 부족합니다.
+        </p>
+        
+        <div class="problem-list">
+            <div class="problem-item">
+                <h3>1. 재미없는 공간</h3>
+                <p>낡은 건물은 많지만, 청년들이 모여 영감을 공유할 문화적 허브는 없습니다.</p>
+            </div>
+            <div class="problem-item">
+                <h3>2. 일회성 이벤트</h3>
+                <p>단발적인 축제나 행사로는 지속적인 정주 환경을 만들 수 없습니다.</p>
+            </div>
+            <div class="problem-item">
+                <h3>3. 청년의 소외</h3>
+                <p>도시 재생이 건축에만 머물러, 정작 지역 대학 동아리나 예비 창업자들이 활동할 플랫폼은 제공하지 못합니다.</p>
+            </div>
+        </div>
+
+        <div class="quote">
+            <p>"우리 동아리가 만든 독립 영화, 상영할 곳도, 봐줄 사람도 없어요."<br>
+            <strong style="color: #FFC72C;">- 지역 대학 영화 동아리 리더</strong></p>
+        </div>
+
+        <p style="text-align: center; font-size: 1.2rem; margin-top: 3rem;">
+            우리는 이 침묵하는 공간들을 청년들의 <strong style="color: #FFC72C;">창작과 소비가 만나는 시네마 플랫폼</strong>으로 재구성합니다.
+        </p>
+    </section>
+
+    <section id="solution" style="background: rgba(31, 60, 95, 0.05);">
+        <h2 data-icon="💡">솔루션 제시</h2>
+        <h3 style="text-align: center; font-size: 1.8rem; color: #FFC72C; margin-bottom: 2rem;">
+            도시 재생 시네마 코디네이터: 공간에 이야기를 입히다.
+        </h3>
+        <p style="text-align: center; font-size: 1.2rem; margin-bottom: 3rem; line-height: 1.8;">
+            단순한 영화 상영을 넘어, 침체된 지역 공간을 청년 주도형 문화 플랫폼으로 전환하는<br>
+            <strong style="color: #FFC72C;">종합 코디네이션 서비스</strong>입니다.
+        </p>
+
+        <div class="solution-list">
+            <div class="solution-item">
+                <h3>1. 시네마 팝업 기획</h3>
+                <p>지역 내 유동인구가 많은 유휴 공간을 발굴하여, 지역 맞춤형 테마 시네마 팝업 공간으로 신속하게 디자인하고 운영합니다.</p>
+            </div>
+            <div class="solution-item">
+                <h3>2. 청년 콘텐츠 연계</h3>
+                <p>지역 대학 영화, 창업 동아리 등과 협력하여, 그들의 독창적인 콘텐츠(영화, 발표, 워크숍)를 팝업 공간에서 상영/개최합니다.</p>
+            </div>
+            <div class="solution-item">
+                <h3>3. 지역 문화 허브 구축</h3>
+                <p>단기 이벤트가 아닌, 지속 가능한 콘텐츠 확보 및 홍보 채널 구축으로 청년 정주를 유도하는 문화 생태계의 중심축이 됩니다.</p>
+            </div>
+        </div>
+
+        <div class="hero-image" style="margin-top: 3rem;">
+            팝업 시네마 공간에서 청년들이 활발하게 대화하며 교류하는 모습
+        </div>
+    </section>
+
+    <section id="benefits">
+        <h2 data-icon="✨">핵심 기능/혜택</h2>
+        <p style="text-align: center; font-size: 1.2rem; margin-bottom: 3rem;">
+            '도시 재생 시네마 코디네이터'를 통해 당신이 얻을 수 있는 3가지 결정적 혜택.
+        </p>
+
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <h3 data-icon="🚀">즉각적인 공간 활성화 및 화제성 확보</h3>
+                <p>장기간 소요되는 시설 구축 없이, MVP 기반의 빠르고 매력적인 팝업 시네마를 운영하여, 지역 커뮤니티의 관심을 즉각적으로 집중시킵니다.</p>
+            </div>
+            <div class="benefit-card">
+                <h3 data-icon="🤝">검증된 청년 잠재 고객 유입 채널 확보</h3>
+                <p>지역 대학 영화, 창업 동아리와의 협력을 최우선으로 하여, 고정적인 문화 소비층이자 미래 정주 가능성이 높은 청년 잠재 고객을 확실하게 확보합니다.</p>
+            </div>
+            <div class="benefit-card">
+                <h3 data-icon="📈">지속 가능한 문화 생태계 기반 마련</h3>
+                <p>지역 문화 기관 및 기존 영화관과의 협력 네트워크 구축을 통해 초기 콘텐츠를 안정적으로 확보하고, 장기적인 지역 문화 콘텐츠의 중심축으로 자리매김합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="trust" style="background: rgba(31, 60, 95, 0.05);">
+        <h2 data-icon="🏆">신뢰 구축</h2>
+        <p style="text-align: center; font-size: 1.3rem; margin-bottom: 3rem; color: #FFC72C;">
+            우리는 단순한 기획자가 아닌, 지역 문화의 새로운 엔진입니다.
+        </p>
+
+        <h3 style="text-align: center; font-size: 1.8rem; margin-bottom: 2rem; color: #e0e0e0;">
+            MVP 검증 계획 및 협력 로드맵
+        </h3>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>항목</th>
+                    <th>내용</th>
+                    <th>기대 효과</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong style="color: #FFC72C;">MVP 형태</strong></td>
+                    <td>유동인구가 많은 공간에 시네마 팝업 운영</td>
+                    <td>콘텐츠 및 공간 기획의 매력도 초기 검증</td>
+                </tr>
+                <tr>
+                    <td><strong style="color: #FFC72C;">검증 대상</strong></td>
+                    <td>지역 대학 영화/창업 관련 동아리</td>
+                    <td>핵심 타겟(청년) 반응을 통한 잠재 고객 확보 가능성 측정</td>
+                </tr>
+                <tr>
+                    <td><strong style="color: #FFC72C;">협력 기관</strong></td>
+                    <td>지역 내 문화 관련 기관, 기존 지역 영화관</td>
+                    <td>초기 콘텐츠 및 홍보 채널 확보, 안정화 기반 마련</td>
+                </tr>
+                <tr>
+                    <td><strong style="color: #FFC72C;">장기 목표</strong></td>
+                    <td>지역 내 새로운 활력 제공 및 확고한 정주 기반 조성</td>
+                    <td>도시 재생 목표 달성 및 신직업의 정규 서비스화</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="hero-image" style="margin-top: 3rem;">
+            협력 기관 로고들이 명료하게 배열된 이미지
+        </div>
+    </section>
+
+    <section id="pricing">
+        <h2 data-icon="💰">가격 및 조건</h2>
+        
+        <div class="pricing-box">
+            <h3>[베타 테스터 한정] 초기 공간 활성화 파일럿 프로그램</h3>
+            <p style="text-align: center; margin-bottom: 2rem; line-height: 1.8;">
+                창직 서비스 런칭 초기, <strong style="color: #FFC72C;">선착순 5개 지역/기관</strong>에 한하여<br>
+                특별한 조건으로 MVP 파일럿 프로그램을 제공합니다.
+            </p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>조건</th>
+                        <th>내용</th>
+                        <th>(정가 대비) 혜택</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong style="color: #FFC72C;">서비스 범위</strong></td>
+                        <td>팝업 공간 기획 및 설치 지원, 1개월간 운영 코디네이션, 청년 동아리 2팀 콘텐츠 연계 지원</td>
+                        <td>전체 서비스의 <strong style="color: #FFC72C;">50% 할인</strong> 적용</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color: #FFC72C;">특별 가격</strong></td>
+                        <td><strong style="color: #FFC72C;">[문의 시 별도 안내]</strong> (기존 유사 서비스 대비 초기 비용 최소화)</td>
+                        <td>초기 투자 리스크 대폭 감소</td>
+                    </tr>
+                    <tr>
+                        <td><strong style="color: #FFC72C;">추가 혜택</strong></td>
+                        <td>1개월 운영 후 상세 결과 보고서 및 장기 로드맵 컨설팅 제공</td>
+                        <td>향후 정부/지자체 사업 연계 자료 확보 가능</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning">
+                <strong style="color: #FFC72C;">⚠️ 주의:</strong> 본 파일럿 프로그램은 MVP 검증을 위한 선착순 한정 오퍼입니다. 조기 마감될 수 있습니다.
+            </div>
+        </div>
+    </section>
+
+    <div class="cta-section" id="cta">
+        <h2 data-icon="✅">당신의 도시에 영감을 줄 시네마를 설치하세요.</h2>
+        <p>침체된 지역에 새로운 숨결을 불어넣을 기회를 놓치지 마십시오.</p>
+        <p><strong style="color: #FFC72C;">도시 재생 시네마 코디네이터</strong>와 함께라면,<br>
+        낡은 공간도 청년들이 찾아오는 문화적 명소가 될 수 있습니다.</p>
+        <p style="font-size: 1.5rem; margin-top: 2rem; color: #FFC72C;">
+            <strong>지금, 가장 선두에서 변화를 시작하십시오.</strong>
+        </p>
+
+        <div class="cta-buttons">
+            <a href="#apply" class="btn btn-primary">초기 공간 활성화 파일럿 프로그램 신청하기</a>
+            <a href="#contact" class="btn btn-secondary">서비스 도입 및 협력 문의</a>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section, .problem-item, .solution-item, .benefit-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
